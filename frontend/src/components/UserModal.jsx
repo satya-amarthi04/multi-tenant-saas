@@ -1,33 +1,94 @@
-import { useState } from 'react';
-import API from '../services/api';
+import { useState } from "react";
+import { createUser } from "../api/userService";
 
-export default function UserModal({ isOpen, onClose }) {
-  const [form, setForm] = useState({ full_name: '', email: '', password: '', role: 'user', is_active: true });
+export default function UserModal({ onClose, onSuccess }) {
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
+  const [active, setActive] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await API.post('/tenants/36a760bf-975c-4060-a1d3-719b07ec50b6/users', form);
-    onClose();
+    setLoading(true);
+    setError("");
+
+    try {
+      await createUser({
+        email,
+        fullName,
+        password,
+        role,
+        active,
+      });
+
+      onSuccess(); // refresh users list
+      onClose();   // close modal
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create user");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!isOpen) return null;
   return (
-    <div className="modal">
-      <form onSubmit={handleSubmit}>
-        <input placeholder="Full Name" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
-        <input placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-        <input placeholder="Password" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-        <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
-          <option value="user">User</option>
-          <option value="tenant_admin">Tenant Admin</option>
-        </select>
-        <label>
-          <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} />
-          Active
-        </label>
-        <button type="submit">Save</button>
-        <button type="button" onClick={onClose}>Cancel</button>
-      </form>
+    <div className="modal-backdrop">
+      <div className="modal">
+        <h3>Add User</h3>
+
+        {error && <p className="error">{error}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="user">User</option>
+            <option value="tenant_admin">Tenant Admin</option>
+          </select>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+            />
+            Active
+          </label>
+
+          <div className="modal-actions">
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

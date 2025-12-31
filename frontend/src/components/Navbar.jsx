@@ -3,27 +3,17 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  if (!user) return null;
 
   return (
-    <nav style={{ padding: 15, background: '#222', color: '#fff' }}>
-      <span style={{ marginRight: 20 }}>Multi-tenant-saas</span>
+    <nav>
+      <Link to="/dashboard">Dashboard</Link>
+      <Link to="/projects">Projects</Link>
 
-      <Link to="/" style={{ marginRight: 10 }}>Home</Link>
+      {user.role === 'tenant_admin' && <Link to="/users">Users</Link>}
 
-      {!user && (
-        <>
-          <Link to="/register" style={{ marginRight: 10 }}>SignUp</Link>
-          <Link to="/login">Login</Link>
-        </>
-      )}
-
-      {user && (
-        <>
-          <Link to="/dashboard" style={{ marginRight: 10 }}>Dashboard</Link>
-          <Link to="/users" style={{ marginRight: 10 }}>Users</Link>
-          <button onClick={logout}>Logout</button>
-        </>
-      )}
+      <span>{user.email} ({user.role})</span>
+      <button onClick={logout}>Logout</button>
     </nav>
   );
 }

@@ -1,11 +1,17 @@
-import API from './api';
+import api from "./api";
 
-// Auth APIs
-export const loginUser = (email, password) => API.post('/auth/login', { email, password });
-export const registerUser = (name, email, password) => API.post('/auth/register', { name, email, password });
+export const getUsers = () => {
+  return api.get("/users");
+};
 
-// Tenant Users APIs
-export const getTenantUsers = (tenantId) => API.get(`/tenants/${tenantId}/users`);
-export const addUser = (tenantId, userData) => API.post(`/tenants/${tenantId}/users`, userData);
-export const updateUser = (userId, userData) => API.put(`/users/${userId}`, userData);
-export const deleteUser = (userId) => API.delete(`/users/${userId}`);
+export const createUser = (data) => {
+  return api.post("/users", data);
+};
+
+export const updateUser = (id, data) => {
+  return api.put(`/users/${id}`, data);
+};
+
+export const deleteUser = (id) => {
+  return api.delete(`/users/${id}`);
+};

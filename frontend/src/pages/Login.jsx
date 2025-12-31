@@ -1,44 +1,26 @@
-// src/pages/LoginPage.jsx
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext.jsx";
+import { useState } from 'react';
+import API from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { login } = useContext(AuthContext);
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [subdomain, setSubdomain] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    // Simulate API login: generate a fake JWT
-    const fakeToken = btoa(JSON.stringify({ email, name: "John Doe" }));
-    login(fakeToken);
-    navigate("/"); // redirect to home
+    const res = await API.post('/auth/login', { email, password, subdomain });
+    localStorage.setItem('token', res.data.data.token);
+    navigate('/dashboard');
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-        />
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    <form onSubmit={submit}>
+      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
+      <input placeholder="Password" type="password" onChange={e => setPassword(e.target.value)} />
+      <input placeholder="Tenant Subdomain" onChange={e => setSubdomain(e.target.value)} />
+      <button>Login</button>
+    </form>
   );
-};
-
-export default LoginPage;
+}

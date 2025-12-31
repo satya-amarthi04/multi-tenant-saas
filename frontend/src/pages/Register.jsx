@@ -1,77 +1,26 @@
 import { useState } from 'react';
 import API from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [subdomain, setSubdomain] = useState('');
-  const [adminEmail, setAdminEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [form, setForm] = useState({});
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      name,
-      subdomain,
-      adminEmail,
-      password,
-      fullName,
-    };
-
-    console.log('Register Payload:', payload);
-
-    try {
-      const res = await API.post('/auth/register-tenant', payload);
-      alert('Registered successfully!');
-      console.log(res.data);
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      setError(err.response?.data?.message || 'Server error');
-    }
+    await API.post('/auth/register-tenant', form);
+    navigate('/login');
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Register Tenant</h2>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Company Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        /><br />
-
-        <input
-          placeholder="Subdomain"
-          value={subdomain}
-          onChange={(e) => setSubdomain(e.target.value)}
-        /><br />
-
-        <input
-          placeholder="Admin Email"
-          value={adminEmail}
-          onChange={(e) => setAdminEmail(e.target.value)}
-        /><br />
-
-        <input
-          placeholder="Admin Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        /><br />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        /><br />
-
-        <button type="submit">Register</button>
-      </form>
-    </div>
+    <form onSubmit={submit}>
+      <input placeholder="Org Name" onChange={e => setForm({ ...form, name: e.target.value })} />
+      <input placeholder="Subdomain" onChange={e => setForm({ ...form, subdomain: e.target.value })} />
+      <input placeholder="Admin Email" onChange={e => setForm({ ...form, adminEmail: e.target.value })} />
+      <input placeholder="Full Name" onChange={e => setForm({ ...form, fullName: e.target.value })} />
+      <input placeholder="Password" type="password" onChange={e => setForm({ ...form, password: e.target.value })} />
+      <input placeholder="Confirm Password" type="Confirm password" onChange={e => setForm({ ...form, password: e.target.value })} />
+      <button>Register</button>
+    </form>
   );
 }
